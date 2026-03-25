@@ -17,4 +17,4 @@ Google Form survey sent to all Zone 129 neighbors to gather feedback on the bloc
 - Interest in helping with setup/breakdown
 - General ideas or requests
 
-**[Take the survey](GOOGLE_FORM_URL)**
+**[Take the survey](https://docs.google.com/forms/d/e/1FAIpQLSd5R9bXy_-jmtNVENMSF4g_HFMI_KF6vVIEmb7m5U7kxNz4TQ/viewform)**
