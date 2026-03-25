@@ -121,11 +121,11 @@
         <div class="stat__label">Streets</div>
       </div>
       <div class="stat">
-        <div class="stat__num">5</div>
+        <div class="stat__num">2</div>
         <div class="stat__label">Efforts</div>
       </div>
       <div class="stat">
-        <div class="stat__num">2</div>
+        <div class="stat__num">1</div>
         <div class="stat__label">Active</div>
       </div>
       <div class="stat">
@@ -183,68 +183,6 @@
       <div class="card__topics"><span class="topic-pill " title="Discuss">Location & Setup</span><span class="topic-pill " title="Define">What to Plant</span><span class="topic-pill " title="Define">Meeting Time</span><span class="topic-pill " title="Propose">Participation</span></div>
     </a>
 
-    <a class="card" href="timeline.html" data-effort="fire-preparedness">
-      <div class="card__header">
-        <h3 class="card__name">Fire Preparedness</h3>
-        <span class="card__status" style="color: #6b7563; border-color: #6b7563">Planned</span>
-      </div>
-      <p class="card__desc">Coordinating home hardening, defensible space, and emergency readiness across Zone 129. Learning from the Eaton Fire to protect what's standing.</p>
-      <div class="card__progress">
-        <div class="card__progress-bg">
-          <div class="card__progress-fill" style="width: 20.0%"></div>
-        </div>
-      </div>
-      
-      <div class="card__stats">
-        <div class="card__stat"><span class="card__stat-num">0</span> entries</div>
-        <div class="card__stat"><span class="card__stat-num">0</span> decisions</div>
-        <div class="card__stat"><span class="card__stat-num">0</span> members</div>
-        <div class="card__stat"><span class="card__stat-num">3</span> topics</div>
-      </div>
-      <div class="card__topics"><span class="topic-pill " title="Define">Home Hardening Audit</span><span class="topic-pill " title="Define">Emergency Contact Tree</span><span class="topic-pill " title="Define">Evacuation Routes</span></div>
-    </a>
-
-    <a class="card" href="timeline.html" data-effort="neighborhood-resources">
-      <div class="card__header">
-        <h3 class="card__name">Neighborhood Resources</h3>
-        <span class="card__status" style="color: #E5905A; border-color: #E5905A">Active</span>
-      </div>
-      <p class="card__desc">Tracking rebuilding resources, aid programs, and deadlines that affect Zone 129. Connecting neighbors to what's available.</p>
-      <div class="card__progress">
-        <div class="card__progress-bg">
-          <div class="card__progress-fill" style="width: 40.0%"></div>
-        </div>
-      </div>
-      
-      <div class="card__stats">
-        <div class="card__stat"><span class="card__stat-num">0</span> entries</div>
-        <div class="card__stat"><span class="card__stat-num">0</span> decisions</div>
-        <div class="card__stat"><span class="card__stat-num">0</span> members</div>
-        <div class="card__stat"><span class="card__stat-num">4</span> topics</div>
-      </div>
-      <div class="card__topics"><span class="topic-pill " title="Propose">Aid Programs</span><span class="topic-pill " title="Define">Contractor Referrals</span><span class="topic-pill " title="Define">Insurance Navigation</span><span class="topic-pill " title="Propose">Deadlines Tracker</span></div>
-    </a>
-
-    <a class="card" href="timeline.html" data-effort="skills-commons">
-      <div class="card__header">
-        <h3 class="card__name">Skills Commons</h3>
-        <span class="card__status" style="color: #7A8A6E; border-color: #7A8A6E">Exploring</span>
-      </div>
-      <p class="card__desc">A shared directory of what neighbors can offer and what they need. Plumbing, legal advice, childcare, tools, rides, language help. We have more than we think.</p>
-      <div class="card__progress">
-        <div class="card__progress-bg">
-          <div class="card__progress-fill" style="width: 20.0%"></div>
-        </div>
-      </div>
-      
-      <div class="card__stats">
-        <div class="card__stat"><span class="card__stat-num">0</span> entries</div>
-        <div class="card__stat"><span class="card__stat-num">0</span> decisions</div>
-        <div class="card__stat"><span class="card__stat-num">0</span> members</div>
-        <div class="card__stat"><span class="card__stat-num">8</span> topics</div>
-      </div>
-      <div class="card__topics"><span class="topic-pill " title="Define">Home & Property</span><span class="topic-pill " title="Define">Professional Services</span><span class="topic-pill " title="Define">Technology</span><span class="topic-pill " title="Define">Care & Support</span><span class="topic-pill " title="Define">Language & Translation</span><span class="topic-pill " title="Define">Tools & Equipment</span><span class="topic-pill " title="Define">Knowledge & Teaching</span><span class="topic-pill " title="Define">Skills Survey</span></div>
-    </a>
     </div>
 
   </div>
@@ -267,7 +205,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", function() {
-      setTheme(localStorage.getItem("ting-theme") || "dark");
+      setTheme(localStorage.getItem("ting-theme") || "light");
       document.querySelectorAll("#theme-toggle .toggle__btn").forEach(function(btn) {
         btn.addEventListener("click", function() { setTheme(this.dataset.themeVal); });
       });
