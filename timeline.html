@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zone 129 &mdash; Timeline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root[data-theme="dark"] {
+      --bg: #1A2316; --bg-header: #1A2316; --bg-footer: #151d11;
+      --text: #FAF6F0; --text-secondary: #a8b0a0; --text-muted: #6b7563;
+      --border: rgba(122,138,110,0.25); --sage: #7A8A6E; --amber: #E5905A; --gold: #c4956a;
+      --tag-bg: rgba(122,138,110,0.15);
+      --status-complete-bg: rgba(122,138,110,0.2); --status-decided-bg: rgba(196,149,106,0.2);
+      --status-active-bg: rgba(229,144,90,0.2); --status-proposed-bg: rgba(250,246,240,0.1);
+      --toggle-bg: rgba(122,138,110,0.2); --toggle-active: #7A8A6E;
+    }
+    :root[data-theme="light"] {
+      --bg: #FAF6F0; --bg-header: #FAF6F0; --bg-footer: #f0ebe4;
+      --text: #1A2316; --text-secondary: #4a5542; --text-muted: #7a8a6e;
+      --border: rgba(46,61,38,0.15); --sage: #5a6a4e; --amber: #c47040; --gold: #a07550;
+      --tag-bg: rgba(46,61,38,0.08);
+      --status-complete-bg: rgba(90,106,78,0.12); --status-decided-bg: rgba(160,117,80,0.12);
+      --status-active-bg: rgba(196,112,64,0.12); --status-proposed-bg: rgba(26,35,22,0.06);
+      --toggle-bg: rgba(46,61,38,0.1); --toggle-active: #2E3D26;
+    }
+
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; transition: background 0.3s, color 0.3s; }
+
+    .sticky-nav { position: sticky; top: 0; z-index: 100; background: var(--bg-header); }
+    .header { background: var(--bg-header); border-bottom: 1px solid var(--border); padding: 16px 40px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .header__left { display: flex; flex-direction: column; }
+    .header__brand { display: flex; align-items: baseline; gap: 8px; }
+    .header__alting { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--sage); text-decoration: none; }
+    .header__alting:hover { opacity: 0.8; }
+    .header__separator { color: var(--border); font-size: 18px; font-weight: 300; }
+    .header__title { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--text); text-decoration: none; }
+    .header__title:hover { opacity: 0.8; }
+    .header__today { font-size: 14px; color: var(--text-secondary); }
+    .header__right { display: flex; gap: 12px; align-items: center; }
+
+    .toggle { display: flex; align-items: center; background: var(--toggle-bg); border-radius: 20px; padding: 2px; }
+    .toggle__btn { background: none; border: none; color: var(--text-muted); padding: 4px 10px; border-radius: 18px; font-size: 12px; font-family: inherit; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .toggle__btn.active { background: var(--toggle-active); color: #FAF6F0; }
+
+    /* --- Effort tabs --- */
+    .effort-tabs { display: flex; gap: 0; padding: 0 40px; border-bottom: 1px solid var(--border); background: var(--bg-header); }
+    .effort-tab { background: none; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); padding: 12px 20px; font-size: 14px; font-family: inherit; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .effort-tab:hover { color: var(--text-secondary); }
+    .effort-tab.active { color: var(--text); border-bottom-color: var(--amber); }
+
+    /* --- Filter row --- */
+    .filter-row { display: flex; gap: 8px; padding: 12px 0; align-items: center; justify-content: flex-end; }
+    .filter-btn { background: none; border: 1px solid var(--border); color: var(--text-secondary); padding: 4px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+    .filter-btn:hover, .filter-btn.active { background: var(--sage); color: #FAF6F0; border-color: var(--sage); }
+
+    /* --- Timeline --- */
+    .timeline { max-width: 800px; margin: 0 auto; padding: 0 40px; }
+
+    /* --- Effort header --- */
+    .effort__header { display: flex; justify-content: space-between; align-items: flex-start; padding: 32px 0 8px; }
+    .effort__name { font-family: 'DM Serif Display', serif; font-size: 28px; }
+    .effort__desc { font-size: 14px; color: var(--text-secondary); margin-top: 4px; max-width: 600px; }
+    .effort-status { font-size: 11px; padding: 4px 12px; border-radius: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: var(--status-active-bg); color: var(--amber); }
+
+    .section-label { font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; padding: 32px 0 16px 24px; }
+    .today-marker { background: var(--toggle-bg); color: var(--text-secondary); font-weight: 600; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; padding: 6px 16px; border-radius: 20px; display: inline-block; margin: 24px 0 20px 24px; border: 1px solid var(--border); }
+    .future-zone { border-left: 2px dashed var(--border); margin-left: 10px; padding-left: 38px; }
+
+    .entry { display: flex; gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--border); }
+    .entry__marker { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; padding-top: 2px; }
+    .entry__content { flex: 1; min-width: 0; }
+    .entry__meta { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+    .entry__date { font-size: 13px; color: var(--text-muted); }
+    .entry__type { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+    .status { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+    .status--complete { background: var(--status-complete-bg); color: var(--sage); }
+    .status--decided { background: var(--status-decided-bg); color: var(--gold); }
+    .status--active { background: var(--status-active-bg); color: var(--amber); }
+    .status--proposed { background: var(--status-proposed-bg); color: var(--text-secondary); }
+    .entry__title { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 8px; color: var(--text); }
+    .entry__body { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+    .entry__body p { margin-bottom: 8px; }
+    .entry__body ul { margin: 8px 0; padding-left: 20px; }
+    .entry__body li { margin-bottom: 4px; }
+    .entry__body strong { color: var(--text); }
+    /* --- Featured entry --- */
+    .entry--featured {
+      background: linear-gradient(135deg, rgba(229,144,90,0.12) 0%, rgba(122,138,110,0.08) 100%);
+      border: 1px solid rgba(229,144,90,0.25);
+      border-radius: 12px;
+      padding: 28px 24px;
+      margin: 8px 0;
+      border-bottom: 1px solid rgba(229,144,90,0.25);
+      position: relative;
+      overflow: hidden;
+    }
+    .entry--featured::before {
+      content: '';
+      display: none;
+    }
+    .entry--featured .entry__title {
+      font-size: 28px;
+      color: #E5905A;
+    }
+    .entry--featured .entry__body {
+      font-size: 16px;
+      line-height: 1.8;
+      color: var(--text-secondary);
+    }
+    .entry--featured .entry__body p { margin-bottom: 12px; }
+    .entry--featured .entry__meta { display: none; }
+
+    .entry__img { max-width: 100%; border-radius: 8px; margin: 8px 0; }
+    .entry__gallery { display: flex; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
+    .entry__gallery .entry__img { width: calc(50% - 6px); height: 200px; object-fit: cover; }
+    .entry__link { color: var(--amber); text-decoration: none; font-weight: 600; }
+    .entry__link:hover { text-decoration: underline; }
+    .entry__cta { display: inline-block; background: #E5905A; color: #1A2316; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 6px; text-decoration: none; margin-top: 12px; transition: background 0.2s; }
+    .entry__cta:hover { background: #d07a48; text-decoration: none; }
+    .entry__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .tag { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: var(--tag-bg); color: var(--sage); font-weight: 500; }
+    .empty { padding: 20px 0 20px 48px; font-size: 14px; color: var(--text-muted); font-style: italic; }
+
+    /* --- Purpose --- */
+    .effort__purpose-section { display: flex; gap: 32px; align-items: flex-start; margin: 8px 0 24px; }
+    .effort__purpose { font-size: 15px; color: var(--text-secondary); line-height: 1.7; flex: 1; }
+    .effort__map { flex-shrink: 0; width: 200px; background: var(--toggle-bg); border-radius: 8px; padding: 12px; }
+    .effort__map svg { width: 100%; height: auto; }
+    .effort__map-label { font-size: 10px; color: var(--text-muted); text-align: center; margin-top: 6px; }
+
+    /* --- Phase tracker --- */
+    .phase-tracker { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .phase__header { display: flex; align-items: center; margin-bottom: 4px; }
+    .phase__topic-spacer { width: 240px; flex-shrink: 0; }
+    .phase__labels { display: flex; flex: 1; }
+    .phase__label { flex: 1; text-align: center; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); padding: 8px 0; }
+    .phase__row { display: flex; align-items: center; padding: 10px 0; border-top: 1px solid var(--border); }
+    .phase__topic { width: 240px; flex-shrink: 0; padding-right: 16px; }
+    .phase__topic-name { font-size: 14px; font-weight: 600; color: var(--text); }
+    .phase__topic-summary { font-size: 12px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+    .phase__track { flex: 1; position: relative; height: 20px; display: flex; align-items: center; }
+    .phase__line-bg { position: absolute; left: 0; right: 0; height: 3px; background: var(--toggle-bg); border-radius: 2px; }
+    .phase__line-fill { position: absolute; left: 0; height: 3px; background: var(--sage); border-radius: 2px; transition: width 0.3s; }
+    .phase__marker { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: var(--amber); transform: translateX(-50%); box-shadow: 0 0 8px rgba(229,144,90,0.35); transition: left 0.3s; }
+
+    /* --- Comments --- */
+    .comments { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); }
+    .comments__label { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+    .comment { padding: 8px 0; }
+    .comment + .comment { border-top: 1px solid var(--border); }
+    .comment__meta { font-size: 12px; color: var(--text-muted); }
+    .comment__meta strong { color: var(--text-secondary); }
+    .comment__text { font-size: 13px; color: var(--text-secondary); margin-top: 4px; line-height: 1.5; }
+
+    /* --- Entry actions --- */
+    .entry__actions { display: flex; gap: 8px; margin-top: 14px; align-items: center; flex-wrap: wrap; }
+    .entry__action { display: flex; align-items: center; gap: 5px; background: none; border: 1px solid var(--border); color: var(--text-muted); padding: 5px 12px; border-radius: 6px; font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.2s; }
+    .entry__action:hover { border-color: var(--sage); color: var(--text-secondary); background: var(--toggle-bg); }
+    .entry__action-icon { font-size: 14px; }
+    .entry__vote-btn { display: flex; align-items: center; gap: 5px; background: #E5905A; color: #1A2316; border: 1px solid #E5905A; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all 0.2s; }
+    .entry__vote-btn:hover { background: #d07a48; border-color: #d07a48; }
+
+    /* --- Phase vote label --- */
+    .phase__label--vote { color: #E5905A; font-weight: 700; }
+
+    .committee { margin-top: 8px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .committee__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 16px; }
+    .committee__member { padding: 16px; background: var(--toggle-bg); border-radius: 8px; }
+    .committee__name { font-weight: 600; font-size: 14px; color: var(--text); }
+    .committee__role { font-size: 12px; color: var(--sage); margin-top: 2px; }
+    .committee__address { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+    .committee__contact { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+    .committee__contact a { color: var(--sage); text-decoration: none; }
+    .committee__contact a:hover { text-decoration: underline; }
+
+    .footer { text-align: center; padding: 48px 40px; margin-top: 64px; font-size: 12px; color: var(--text-muted); background: var(--bg-footer); }
+    .footer a { color: var(--sage); text-decoration: none; }
+    .footer__brand { margin-bottom: 8px; }
+    .footer__alting { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--text-secondary); }
+    .footer__tagline { display: block; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-top: 4px; }
+    .footer__meta { font-size: 12px; color: var(--text-muted); }
+
+    /* --- About section --- */
+    .about { padding: 48px 0 16px; }
+    .about__section { margin-bottom: 32px; }
+    .about__heading { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--text); margin-bottom: 10px; }
+    .about__text { font-size: 15px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 10px; max-width: 700px; }
+    .about__text strong { color: var(--text); }
+    .about__values { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 12px; }
+    .about__value { padding: 20px; background: var(--toggle-bg); border-radius: 8px; }
+    .about__value-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .about__value-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+    /* --- Block Captain --- */
+    .about__captain { padding: 20px; background: var(--toggle-bg); border-radius: 8px; border-left: 3px solid var(--amber); max-width: 400px; }
+    .about__captain-name { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); }
+    .about__captain-address { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+    .about__captain-role { font-size: 13px; color: var(--sage); margin-top: 4px; font-weight: 500; }
+    .about__captain-contact { font-size: 13px; margin-top: 8px; }
+    .about__captain-contact a { color: var(--amber); text-decoration: none; }
+    .about__captain-contact a:hover { text-decoration: underline; }
+
+    /* --- Members section --- */
+    .members-section { padding: 32px 0; }
+    .members__summary { font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; }
+    .members__street { margin-bottom: 16px; }
+    .members__street-name { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+    .members__count { font-weight: 400; color: var(--text-muted); }
+    .members__list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .member__pill { font-size: 12px; padding: 3px 10px; border-radius: 14px; background: var(--toggle-bg); color: var(--text-secondary); cursor: default; transition: all 0.2s; }
+    .member__pill:hover { background: var(--sage); color: #FAF6F0; }
+
+    @media (max-width: 600px) {
+      .header { padding: 12px 16px; flex-wrap: wrap; }
+      .effort-tabs { padding: 0 16px; overflow-x: auto; }
+      .filter-row { padding: 12px 16px; flex-wrap: wrap; }
+      .about__values { grid-template-columns: 1fr; }
+      .phase__topic-spacer { width: 140px; }
+      .phase__topic { width: 140px; }
+      .phase__topic-summary { display: none; }
+      .phase__label { font-size: 9px; }
+      .timeline { padding: 0 20px; }
+      .section-label, .today-marker { margin-left: 40px; }
+      .future-zone { padding-left: 30px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sticky-nav">
+  <header class="header">
+    <div class="header__left">
+      <div class="header__brand">
+        <a href="dashboard.html" class="header__alting">Alting</a>
+        <span class="header__separator">/</span>
+        <a href="dashboard.html" class="header__title">Zone 129</a>
+      </div>
+      <div class="header__today" data-i18n="today_date">March 23, 2026</div>
+    </div>
+    <div class="header__right">
+      <div class="toggle" id="lang-toggle">
+        <button class="toggle__btn active" data-lang="en">EN</button>
+        <button class="toggle__btn" data-lang="es">ES</button>
+      </div>
+      <div class="toggle" id="theme-toggle">
+        <button class="toggle__btn active" data-theme-val="dark">&#9789;</button>
+        <button class="toggle__btn" data-theme-val="light">&#9788;</button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="effort-tabs">
+    <button class="effort-tab" data-effort="about" data-en="About" data-es="Acerca de">About</button>
+      <button class="effort-tab active" data-effort="block-party" data-en="Block Party" data-es="Fiesta del Vecindario">Block Party</button>
+      <button class="effort-tab" data-effort="community-garden" data-en="Community Garden" data-es="Jardín Comunitario">Community Garden</button>
+      <button class="effort-tab" data-effort="fire-preparedness" data-en="Fire Preparedness" data-es="Preparación contra Incendios">Fire Preparedness</button>
+      <button class="effort-tab" data-effort="neighborhood-resources" data-en="Neighborhood Resources" data-es="Recursos del Vecindario">Neighborhood Resources</button>
+      <button class="effort-tab" data-effort="skills-commons" data-en="Skills Commons" data-es="Recursos Compartidos">Skills Commons</button>
+      
+  </nav>
+  </div>
+
+  <div class="timeline">
+  <div class="filter-row">
+    <button class="filter-btn active" data-filter="all" data-i18n="filter_all">All</button>
+    <button class="filter-btn" data-filter="event" data-i18n="filter_events">Events</button>
+    <button class="filter-btn" data-filter="decision" data-i18n="filter_decisions">Decisions</button>
+    <button class="filter-btn" data-filter="discussion" data-i18n="filter_discussions">Discussions</button>
+    <button class="filter-btn" data-filter="document" data-i18n="filter_documents">Documents</button>
+  </div>
+    
+  <div class="effort" id="effort-about" data-effort="about" style="display: none;">
+
+    <div class="about">
+      <h2 class="effort__name">About Zone 129</h2>
+
+      <div class="about__section">
+        <h3 class="about__heading">What is Zone 129?</h3>
+        <p class="about__text">Zone 129 is a neighborhood block in Altadena, California, covering three streets: Morada Place, Mar Vista Avenue, and New York Drive. We are 117 people. Some of us have lived here for decades. Some moved in last year. After the Eaton Fire, we realized we needed a way to come together, not just to recover, but to build something lasting.</p>
+      </div>
+
+      <div class="about__section">
+        <h3 class="about__heading">What is a Ting?</h3>
+        <p class="about__text">A <strong>Ting</strong> is a group of people who trust each other enough to decide together. The word comes from Old Norse, where a ting was a public assembly where free people gathered to govern themselves. Zone 129 is our Ting. It is how we organize, deliberate, and make decisions as a neighborhood.</p>
+        <p class="about__text">Every Ting follows the same process: <strong>Define</strong> the question. <strong>Propose</strong> options. <strong>Discuss</strong> openly. <strong>Vote</strong> (one person, one vote). <strong>Record</strong> the decision. The record is the product: proof that we decided together.</p>
+      </div>
+
+      <div class="about__section">
+        <h3 class="about__heading">Our Values</h3>
+        <div class="about__values">
+          <div class="about__value">
+            <div class="about__value-name">One Person, One Vote</div>
+            <p class="about__value-desc">Every neighbor has an equal voice. Consensus is tied to personhood, not property, seniority, or influence.</p>
+          </div>
+          <div class="about__value">
+            <div class="about__value-name">Transparency</div>
+            <p class="about__value-desc">Every decision, every discussion, every concern is recorded. The process is visible to everyone in the Ting.</p>
+          </div>
+          <div class="about__value">
+            <div class="about__value-name">Belonging</div>
+            <p class="about__value-desc">This is not a committee. It is a neighborhood. Everyone on these three streets is part of Zone 129, whether they participate actively or not.</p>
+          </div>
+          <div class="about__value">
+            <div class="about__value-name">Bottom Up</div>
+            <p class="about__value-desc">We don't wait for institutions to organize us. We organize ourselves and bring our decisions to the institutions that serve us.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="about__section">
+        <h3 class="about__heading">Our Vision</h3>
+        <p class="about__text">Zone 129 is a neighborhood that governs itself. Where neighbors know each other's names, share what they have, and make decisions together about the things that affect their daily lives. We start small: a block party, a garden, a shared conversation about what this street should feel like. Each effort is practice. Each decision record is proof that we can do this.</p>
+      </div>
+
+      <div class="about__section">
+        <h3 class="about__heading">Block Captain</h3>
+        <div class="about__captain">
+          <div class="about__captain-name">Petra Wennberg</div>
+          <div class="about__captain-address">1184 Morada Pl, Altadena, CA 91001</div>
+          <div class="about__captain-role">Altagether Block Captain &mdash; Zone 129</div>
+          <div class="about__captain-contact"><a href="mailto:petra_wennberg@icloud.com">petra_wennberg@icloud.com</a></div>
+        </div>
+      </div>
+
+      <div class="members-section">
+        <h3 class="about__heading" data-i18n="label_neighbors">Our Neighbors</h3>
+        <p class="members__summary">117 people across 3 streets</p>
+        
+            <div class="members__street">
+              <div class="members__street-name">Morada Pl <span class="members__count">(87)</span></div>
+              <div class="members__list"><span class="member__pill" title="1244 Morada Pl">Akiko Kumagai</span><span class="member__pill" title="1160 Morada Pl">Analise Anderson</span><span class="member__pill" title="1290 Morada Pl">Andrea Blake</span><span class="member__pill" title="1235 Morada Pl">Andrew Miller</span><span class="member__pill" title="1210 Morada Pl">Anne Lansing</span><span class="member__pill" title="1317 Morada Pl">Araceli Ventura</span><span class="member__pill" title="1226 Morada Pl">Berneita Clark</span><span class="member__pill" title="1170 Morada Pl">Bettina Rohan</span><span class="member__pill" title="1244 Morada Pl">Bill Dunphy</span><span class="member__pill" title="1190 Morada Pl">Carol Standing</span><span class="member__pill" title="1191 Morada Pl">Caryl Tyberg</span><span class="member__pill" title="1300 Morada Pl">Cecilia Rodriguez</span><span class="member__pill" title="1317 Morada Pl">Charon Sandoval</span><span class="member__pill" title="1275 Morada Pl">Cheng</span><span class="member__pill" title="1207 Morada Pl">Chris Wong</span><span class="member__pill" title="1171 Morada Pl">Christopher Kilanowski</span><span class="member__pill" title="1140 Morada Pl">Dartanion Cathirell II</span><span class="member__pill" title="1270 Morada Pl">David Israelsson</span><span class="member__pill" title="1317 Morada Pl">David Sandoval</span><span class="member__pill" title="1175 Morada Pl">David Takata</span><span class="member__pill" title="1146 Morada Pl">Debra Cohen</span><span class="member__pill" title="1226 Morada Pl">Diane Clark</span><span class="member__pill" title="1140 Morada Pl">Edwin Steen</span><span class="member__pill" title="1171 Morada Pl">Elaine Kilanowski</span><span class="member__pill" title="1285 Morada Pl">Emma Arakelyan</span><span class="member__pill" title="1290 Morada Pl">Erin Blake</span><span class="member__pill" title="1292 Morada Pl">Frances Hodges</span><span class="member__pill" title="1200 Morada Pl">Galidan Nauber</span><span class="member__pill" title="1170 Morada Pl">Gary Wilson</span><span class="member__pill" title="1207 Morada Pl">George Wong</span><span class="member__pill" title="1207 Morada Pl">Grace Wong</span><span class="member__pill" title="1245 Morada Pl">Guillermo Villarreal</span><span class="member__pill" title="1262 Morada Pl">Iliana Penichet-Ramirez</span><span class="member__pill" title="1221 Morada Pl">Isabella Conn</span><span class="member__pill" title="1160 Morada Pl">Jacob Anderson</span><span class="member__pill" title="1220 Morada Pl">James Green</span><span class="member__pill" title="1175 Morada Pl">Jan Takata</span><span class="member__pill" title="1220 Morada Pl">Janie Green</span><span class="member__pill" title="1262 Morada Pl">Jeff Penichet</span><span class="member__pill" title="1191 Morada Pl">Jim Tyberg</span><span class="member__pill" title="1171 Morada Pl">Joe Kilanowski</span><span class="member__pill" title="1301 Morada Pl">John Bonnell</span><span class="member__pill" title="1220 Morada Pl">John Green</span><span class="member__pill" title="1210 Morada Pl">Katherine Lansing</span><span class="member__pill" title="1301 Morada Pl">Kathleen Bonnell</span><span class="member__pill" title="1285 Morada Pl">Kellerman</span><span class="member__pill" title="1160 Morada Pl">Ken Anderson</span><span class="member__pill" title="1175 Morada Pl">Lisa Takata</span><span class="member__pill" title="1160 Morada Pl">Lourdes Anderson</span><span class="member__pill" title="1174 Morada Pl">Lynne McDaniel</span><span class="member__pill" title="1255 Morada Pl">Marc Horowitz</span><span class="member__pill" title="1245 Morada Pl">Margaret Villarreal</span><span class="member__pill" title="1200 Morada Pl">Maria Nauber</span><span class="member__pill" title="1262 Morada Pl">Marian Penichet</span><span class="member__pill" title="1285 Morada Pl">Mark Atallah</span><span class="member__pill" title="1300 Morada Pl">Marta Mora</span><span class="member__pill" title="1301 Morada Pl">Mary Lea Floden</span><span class="member__pill" title="1316 Morada Pl">Mary Shugard</span><span class="member__pill" title="1316 Morada Pl">Megan Kenney</span><span class="member__pill" title="1191 Morada Pl">Merrick Drake</span><span class="member__pill" title="1221 Morada Pl">Michele Conn</span><span class="member__pill" title="1275 Morada Pl">Mimi Hennessy</span><span class="member__pill" title="1293 Morada Pl">Mohammad Oliai</span><span class="member__pill" title="1184 Morada Pl">Mona Cesario</span><span class="member__pill" title="1210 Morada Pl">Nora Lansing</span><span class="member__pill" title="1184 Morada Pl">Paul Ragan</span><span class="member__pill" title="1290 Morada Pl">Paula Blake</span><span class="member__pill" title="1255 Morada Pl">Penny Cortright</span><span class="member__pill" title="1255 Morada Pl">Petra Cortright</span><span class="member__pill" title="1184 Morada Pl">Petra Wennberg</span><span class="member__pill" title="1301 Morada Pl">Philip Vaughan</span><span class="member__pill" title="1317 Morada Pl">Rafael Ventura</span><span class="member__pill" title="1190 Morada Pl">Ralston Riggs</span><span class="member__pill" title="1140 Morada Pl">Reba Steen</span><span class="member__pill" title="1300 Morada Pl">Roberto Rodriquez</span><span class="member__pill" title="1210 Morada Pl">Rosalie Lansing</span><span class="member__pill" title="1190 Morada Pl">Ross Riggs</span><span class="member__pill" title="1140 Morada Pl">Sheena Steen Cathirell</span><span class="member__pill" title="1317 Morada Pl">Silvia Manriquez</span><span class="member__pill" title="1235 Morada Pl">Susan Miller</span><span class="member__pill" title="1146 Morada Pl">Thomas Stahl</span><span class="member__pill" title="1190 Morada Pl">Tina Chambers</span><span class="member__pill" title="1210 Morada Pl">Tom Lansing</span><span class="member__pill" title="1185 Morada Pl">Trecia Denise</span><span class="member__pill" title="1270 Morada Pl">Ulf Israelsson</span><span class="member__pill" title="1220 Morada Pl">Vaughn Verdi</span><span class="member__pill" title="1293 Morada Pl">Zadeh</span></div>
+            </div>
+            <div class="members__street">
+              <div class="members__street-name">Mar Vista Ave <span class="members__count">(23)</span></div>
+              <div class="members__list"><span class="member__pill" title="2055 Mar Vista Ave">Carole Bradley</span><span class="member__pill" title="1938 Mar Vista Ave">Deborah Hemela</span><span class="member__pill" title="1979 Mar Vista Ave">Eleanor Veitch</span><span class="member__pill" title="1999 Mar Vista Ave">Eveanna Manley</span><span class="member__pill" title="1951 Mar Vista Ave">Felicia Berryman</span><span class="member__pill" title="1992 Mar Vista">Grier Ross</span><span class="member__pill" title="1961 Mar Vista Ave">Henry Moon</span><span class="member__pill" title="2055 Mar Vista Ave">James Bradley</span><span class="member__pill" title="1979 Mar Vista Ave">John Alexander Veitch</span><span class="member__pill" title="1979 Mar Vista Ave">Jonathan Veitch</span><span class="member__pill" title="1992 Mar Vista Ave">Luz Dono</span><span class="member__pill" title="1979 Mar Vista Ave">Margaret Veitch</span><span class="member__pill" title="2027 Mar Vista Ave">Pamela Aubert</span><span class="member__pill" title="1945 Mar Vista Ave">Randel Horton</span><span class="member__pill" title="2027 Mar Vista Ave">Raphael Alford</span><span class="member__pill" title="1961 Mar Vista Ave">Roberta Moon</span><span class="member__pill" title="1945 Mar Vista Ave">Sandra Horton</span><span class="member__pill" title="1979 Mar Vista Ave">Sarah Veitch</span><span class="member__pill" title="2043 Mar Vista Ave">Shane Underwood</span><span class="member__pill" title="1992 Mar Vista Ave">Susan Ross</span><span class="member__pill" title="1989 Mar Vista Ave">Vivien Fortunaso</span><span class="member__pill" title="1992 Mar Vista Ave">William Ross</span><span class="member__pill" title="2043 Mar Vista Ave">Zenia Wyndon</span></div>
+            </div>
+            <div class="members__street">
+              <div class="members__street-name">New York Dr <span class="members__count">(7)</span></div>
+              <div class="members__list"><span class="member__pill" title="1183 New York Dr">Genevieve Nash</span><span class="member__pill" title="1145 New York Dr">Hugh Danna</span><span class="member__pill" title="1177 New York Dr">Jeanette Macht</span><span class="member__pill" title="1177 New York Dr">Jonathan Finkelstein</span><span class="member__pill" title="1137 New York Dr">Katherine Flores</span><span class="member__pill" title="1177 New York Dr">Lily Finkelstein</span><span class="member__pill" title="1103 New York Dr">Yvonne Dsaachs</span></div>
+            </div>
+      </div>
+
+    </div>
+  </div>
+    
+  <div class="effort" id="effort-block-party" data-effort="block-party" style="display: none;">
+    <div class="effort__header">
+      <div>
+        <h2 class="effort__name">Block Party</h2>
+        <p class="effort__desc">Planning a neighborhood block party for late June to celebrate recovery, honor our neighbors, and build lasting connections after the Eaton Fire. Street takeover across front lawns on Morada Pl with food, music, and community.</p>
+      </div>
+      <span class="effort-status" data-i18n="effort_status_active">active</span>
+    </div>
+
+    <div class="effort__purpose-section">
+      <p class="effort__purpose">Zone 129 is planning a neighborhood block party to celebrate recovery and build lasting connections after the Eaton Fire. This is our first collective effort as a block: neighbors coming together to decide what this event looks like, who contributes what, and how we show up for each other.</p>
+      
+    </div>
+    
+    <div class="phase-tracker">
+      <div class="section-label" style="padding-left: 0;" data-i18n="label_process">Governance Process</div>
+      <div class="phase__header">
+        <div class="phase__topic-spacer"></div>
+        <div class="phase__labels"><div class="phase__label">Define</div><div class="phase__label">Propose</div><div class="phase__label">Discuss</div><div class="phase__label phase__label--vote">Vote</div><div class="phase__label">Record</div></div>
+      </div>
+      
+            <div class="phase__row">
+              <div class="phase__topic">
+                <div class="phase__topic-name">Date & Time</div>
+                <div class="phase__topic-summary">Late June, 4-8pm, before July 4th weekend</div>
+              </div>
+              <div class="phase__track">
+                <div class="phase__line-bg"></div>
+                <div class="phase__line-fill" style="width: 50.0%"></div>
+                <div class="phase__marker" style="left: 50.0%"></div>
+              </div>
+            </div>
+            <div class="phase__row">
+              <div class="phase__topic">
+                <div class="phase__topic-name">Event Format</div>
+                <div class="phase__topic-summary">Street takeover across 4-5 front lawns</div>
+              </div>
+              <div class="phase__track">
+                <div class="phase__line-bg"></div>
+                <div class="phase__line-fill" style="width: 50.0%"></div>
+                <div class="phase__marker" style="left: 50.0%"></div>
+              </div>
+            </div>
+            <div class="phase__row">
+              <div class="phase__topic">
+                <div class="phase__topic-name">Food & Drink</div>
+                <div class="phase__topic-summary">Paul anchors with paella, potluck via SignUpGenius, angel fund for costs</div>
+              </div>
+              <div class="phase__track">
+                <div class="phase__line-bg"></div>
+                <div class="phase__line-fill" style="width: 50.0%"></div>
+                <div class="phase__marker" style="left: 50.0%"></div>
+              </div>
+            </div>
+            <div class="phase__row">
+              <div class="phase__topic">
+                <div class="phase__topic-name">Music & Entertainment</div>
+                <div class="phase__topic-summary">Guillermo unavailable. Checking with Wassermans (jazz). DJ setup TBD.</div>
+              </div>
+              <div class="phase__track">
+                <div class="phase__line-bg"></div>
+                <div class="phase__line-fill" style="width: 50.0%"></div>
+                <div class="phase__marker" style="left: 50.0%"></div>
+              </div>
+            </div>
+            <div class="phase__row">
+              <div class="phase__topic">
+                <div class="phase__topic-name">Street Closure</div>
+                <div class="phase__topic-summary">Thomas Cohen checking with Barger's office on permit</div>
+              </div>
+              <div class="phase__track">
+                <div class="phase__line-bg"></div>
+                <div class="phase__line-fill" style="width: 30.0%"></div>
+                <div class="phase__marker" style="left: 30.0%"></div>
+              </div>
+            </div>
+            <div class="phase__row">
+              <div class="phase__topic">
+                <div class="phase__topic-name">Honoring Dart Cathirell</div>
+                <div class="phase__topic-summary">Recognize Dart and sons for firefighting efforts. Format TBD.</div>
+              </div>
+              <div class="phase__track">
+                <div class="phase__line-bg"></div>
+                <div class="phase__line-fill" style="width: 50.0%"></div>
+                <div class="phase__marker" style="left: 50.0%"></div>
+              </div>
+            </div>
+            <div class="phase__row">
+              <div class="phase__topic">
+                <div class="phase__topic-name">Funding</div>
+                <div class="phase__topic-summary">Angel fund started ($300 pledged). Lynne researching grants.</div>
+              </div>
+              <div class="phase__track">
+                <div class="phase__line-bg"></div>
+                <div class="phase__line-fill" style="width: 30.0%"></div>
+                <div class="phase__marker" style="left: 30.0%"></div>
+              </div>
+            </div>
+            <div class="phase__row">
+              <div class="phase__topic">
+                <div class="phase__topic-name">Outreach</div>
+                <div class="phase__topic-summary">Survey sent. Gathering neighbor input on preferences and contributions.</div>
+              </div>
+              <div class="phase__track">
+                <div class="phase__line-bg"></div>
+                <div class="phase__line-fill" style="width: 10.0%"></div>
+                <div class="phase__marker" style="left: 10.0%"></div>
+              </div>
+            </div>
+            <div class="phase__row">
+              <div class="phase__topic">
+                <div class="phase__topic-name">Equipment & Setup</div>
+                <div class="phase__topic-summary">Need to survey what neighbors can lend (tables, chairs, tents, lights)</div>
+              </div>
+              <div class="phase__track">
+                <div class="phase__line-bg"></div>
+                <div class="phase__line-fill" style="width: 10.0%"></div>
+                <div class="phase__marker" style="left: 10.0%"></div>
+              </div>
+            </div>
+    </div>
+    
+    <div class="committee">
+      <div class="section-label" style="padding-left: 0;" data-i18n="label_committee">Planning Committee</div>
+      <div class="committee__grid">
+        
+        <div class="committee__member">
+          <div class="committee__name">Petra Wennberg</div>
+          <div class="committee__role">Block Captain, Survey & Communications</div>
+          <div class="committee__address">1184 Morada Pl</div>
+          <div class="committee__contact"><a href="mailto:petra_wennberg@icloud.com">petra_wennberg@icloud.com</a></div>
+        </div>
+        <div class="committee__member">
+          <div class="committee__name">Paul Ragan</div>
+          <div class="committee__role">Food Coordinator (Anchor Dishes)</div>
+          <div class="committee__address">1184 Morada Pl</div>
+          <div class="committee__contact"><a href="mailto:thechef.paul@gmail.com">thechef.paul@gmail.com</a></div>
+        </div>
+        <div class="committee__member">
+          <div class="committee__name">Debra Cohen</div>
+          <div class="committee__role">Special Events Coordinator, Logistics & Setup</div>
+          <div class="committee__address">1146 Morada Pl</div>
+          <div class="committee__contact"><a href="mailto:cohendebra@earthlink.net">cohendebra@earthlink.net</a> &middot; (626) 808-3059</div>
+        </div>
+        <div class="committee__member">
+          <div class="committee__name">Jim Tyberg</div>
+          <div class="committee__role">Neighborhood Map & Layout</div>
+          <div class="committee__address">1191 Morada Pl</div>
+          <div class="committee__contact"><a href="mailto:jrtyberg@gmail.com">jrtyberg@gmail.com</a> &middot; (626) 422-1622</div>
+        </div>
+        <div class="committee__member">
+          <div class="committee__name">Lynne McDaniel</div>
+          <div class="committee__role">Music & Grant Research</div>
+          <div class="committee__address">1174 Morada Pl</div>
+          <div class="committee__contact"><a href="mailto:lynne.mcdaniel@gmail.com">lynne.mcdaniel@gmail.com</a> &middot; (626) 665-4566</div>
+        </div>
+        <div class="committee__member">
+          <div class="committee__name">Bettina Wilson</div>
+          <div class="committee__role">Contact Verification, SignUpGenius</div>
+          <div class="committee__address">1170 Morada Pl</div>
+          <div class="committee__contact"><a href="mailto:bettinarohanwilson@gmail.com">bettinarohanwilson@gmail.com</a> &middot; (818) 766-5782</div>
+        </div>
+        <div class="committee__member">
+          <div class="committee__name">Anne Lansing</div>
+          <div class="committee__role">Planning Committee</div>
+          <div class="committee__address">1210 Morada Pl</div>
+          <div class="committee__contact"><a href="mailto:alansing@cityofpasadena.net">alansing@cityofpasadena.net</a> &middot; (626) 374-2209</div>
+        </div>
+        <div class="committee__member">
+          <div class="committee__name">EveAnna Manley</div>
+          <div class="committee__role">Planning Committee</div>
+          <div class="committee__address">1999 Mar Vista Ave</div>
+          <div class="committee__contact"><a href="mailto:vanimal@me.com">vanimal@me.com</a> &middot; (818) 519-3539</div>
+        </div>
+        <div class="committee__member">
+          <div class="committee__name">Mimi Hennessy</div>
+          <div class="committee__role">Planning Committee</div>
+          <div class="committee__address">1275 Morada Pl</div>
+          <div class="committee__contact"><a href="mailto:mimi510@me.com">mimi510@me.com</a> &middot; (626) 429-1004</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label" data-i18n="label_past">Past</div>
+    <div class="effort__past">
+      
+    <div class="entry" data-type="document" data-tags="block-party,roles">
+      <div class="entry__marker" style="color: #6b7563">&#9744;</div>
+      <div class="entry__content">
+        <div class="entry__meta">
+          <time class="entry__date">Mar 11, 2026</time>
+          <span class="entry__type" style="color: #6b7563">Document</span>
+          <span class="status status--active" data-status="active">active</span>
+        </div>
+        <h3 class="entry__title">Action Items from Planning Meeting</h3>
+        <div class="entry__body"><p>Assigned at the March 11 meeting:</p>
+
+<ul>
+  <li><strong>Petra:</strong> Create Google Form survey with options and feedback collection</li>
+  <li><strong>Bettina:</strong> Set up Google Sheet for contact verification, manage SignUpGenius</li>
+  <li><strong>Lynne:</strong> Reach out to Guillermo about music participation</li>
+  <li><strong>Jim:</strong> Share neighborhood map with house locations and names</li>
+  <li><strong>Paul:</strong> Plan paella logistics and coordinate food categories</li>
+  <li><strong>Deb:</strong> Coordinate logistics and setup as special events coordinator</li>
+  <li><strong>All:</strong> Research neighborhood musicians and equipment availability</li>
+</ul></div>
+        
+        
+        <div class="entry__actions">
+          <button class="entry__action" title="Add a comment" data-i18n-title="action_comment">
+            <span class="entry__action-icon">&#9998;</span>
+            <span data-i18n="action_comment">Comment</span>
+          </button>
+          <button class="entry__action" title="Raise a concern" data-i18n-title="action_concern">
+            <span class="entry__action-icon">&#9888;</span>
+            <span data-i18n="action_concern">Concern</span>
+          </button>
+          
+        </div>
+        <div class="entry__tags"><span class="tag">block-party</span><span class="tag">roles</span></div>
+      </div>
+    </div>
+
+    <div class="entry" data-type="event" data-tags="block-party,location">
+      <div class="entry__marker" style="color: #7A8A6E">&#9679;</div>
+      <div class="entry__content">
+        <div class="entry__meta">
+          <time class="entry__date">Mar 11, 2026</time>
+          <span class="entry__type" style="color: #7A8A6E">Event</span>
+          <span class="status status--active" data-status="active">active</span>
+        </div>
+        <h3 class="entry__title">Street Closure Inquiry</h3>
+        <div class="entry__body"><p>Thomas Cohen volunteered to check in with Kathryn Barger's Altadena field office about streamlining a street closure permit. He has experience with the predecessor's office (Mike Antonovich) from Altadena Heritage events. Status: pending response.</p></div>
+        
+        
+        <div class="entry__actions">
+          <button class="entry__action" title="Add a comment" data-i18n-title="action_comment">
+            <span class="entry__action-icon">&#9998;</span>
+            <span data-i18n="action_comment">Comment</span>
+          </button>
+          <button class="entry__action" title="Raise a concern" data-i18n-title="action_concern">
+            <span class="entry__action-icon">&#9888;</span>
+            <span data-i18n="action_concern">Concern</span>
+          </button>
+          
+        </div>
+        <div class="entry__tags"><span class="tag">block-party</span><span class="tag">location</span></div>
+      </div>
+    </div>
+
+    <div class="entry" data-type="decision" data-tags="block-party,food">
+      <div class="entry__marker" style="color: #c4956a">&#9733;</div>
+      <div class="entry__content">
+        <div class="entry__meta">
+          <time class="entry__date">Mar 11, 2026</time>
+          <span class="entry__type" style="color: #c4956a">Decision</span>
+          <span class="status status--decided" data-status="decided">decided</span>
+        </div>
+        <h3 class="entry__title">Food: Paul Anchors, Potluck for the Rest</h3>
+        <div class="entry__body"><p><strong>Question:</strong> Should the block party food be potluck, catered by Paul, or both?</p>
+
+<p><strong>Decision:</strong> Paul anchors with a main dish (possibly paella). Potluck organized via SignUpGenius with categories: anchor dishes, salads, appetizers, desserts, and "surprise us." Angel fund for neighbors who can't contribute. Planning for 80+ people.</p></div>
+        
+        
+        <div class="entry__actions">
+          <button class="entry__action" title="Add a comment" data-i18n-title="action_comment">
+            <span class="entry__action-icon">&#9998;</span>
+            <span data-i18n="action_comment">Comment</span>
+          </button>
+          <button class="entry__action" title="Raise a concern" data-i18n-title="action_concern">
+            <span class="entry__action-icon">&#9888;</span>
+            <span data-i18n="action_concern">Concern</span>
+          </button>
+          
+        </div>
+        <div class="entry__tags"><span class="tag">block-party</span><span class="tag">food</span></div>
+      </div>
+    </div>
+
+    <div class="entry" data-type="decision" data-tags="block-party">
+      <div class="entry__marker" style="color: #c4956a">&#9733;</div>
+      <div class="entry__content">
+        <div class="entry__meta">
+          <time class="entry__date">Mar 11, 2026</time>
+          <span class="entry__type" style="color: #c4956a">Decision</span>
+          <span class="status status--decided" data-status="decided">decided</span>
+        </div>
+        <h3 class="entry__title">Timing: Late June, 4–8pm</h3>
+        <div class="entry__body"><p><strong>Question:</strong> When should we hold the block party?</p>
+
+<p><strong>Decision:</strong> Late June to early July, before July 4th weekend. Avoid Memorial Day weekend. 4–8pm timeframe (sunset at 8:15pm in late June). Exact date TBD via survey.</p></div>
+        
+        
+        <div class="entry__actions">
+          <button class="entry__action" title="Add a comment" data-i18n-title="action_comment">
+            <span class="entry__action-icon">&#9998;</span>
+            <span data-i18n="action_comment">Comment</span>
+          </button>
+          <button class="entry__action" title="Raise a concern" data-i18n-title="action_concern">
+            <span class="entry__action-icon">&#9888;</span>
+            <span data-i18n="action_concern">Concern</span>
+          </button>
+          
+        </div>
+        <div class="entry__tags"><span class="tag">block-party</span></div>
+      </div>
+    </div>
+
+    <div class="entry" data-type="event" data-tags="block-party,food,community">
+      <div class="entry__marker" style="color: #7A8A6E">&#9679;</div>
+      <div class="entry__content">
+        <div class="entry__meta">
+          <time class="entry__date">Mar 11, 2026</time>
+          <span class="entry__type" style="color: #7A8A6E">Event</span>
+          <span class="status status--active" data-status="active">active</span>
+        </div>
+        <h3 class="entry__title">Angel Fund Started</h3>
+        <div class="entry__body"><p>Debra and Thomas Cohen offered $300 to underwrite Paul's anchor dishes, making the event free to attend for everyone. Jim Tyberg voiced support for the idea. Additional sponsors welcome.</p></div>
+        <div class="comments"><div class="comments__label" data-i18n="label_comments">Comments</div>
+            <div class="comment">
+              <div class="comment__meta"><strong>Jim Tyberg</strong> &middot; 2026-03-12</div>
+              <div class="comment__text">I support underwriting a substantial portion. Would be nice to be further along in estimating costs first.</div>
+            </div>
+            <div class="comment">
+              <div class="comment__meta"><strong>EveAnna Manley</strong> &middot; 2026-03-12</div>
+              <div class="comment__text">Great idea. Happy to contribute as well.</div>
+            </div></div>
+        
+        <div class="entry__actions">
+          <button class="entry__action" title="Add a comment" data-i18n-title="action_comment">
+            <span class="entry__action-icon">&#9998;</span>
+            <span data-i18n="action_comment">Comment</span>
+          </button>
+          <button class="entry__action" title="Raise a concern" data-i18n-title="action_concern">
+            <span class="entry__action-icon">&#9888;</span>
+            <span data-i18n="action_concern">Concern</span>
+          </button>
+          
+        </div>
+        <div class="entry__tags"><span class="tag">block-party</span><span class="tag">food</span><span class="tag">community</span></div>
+      </div>
+    </div>
+
+    <div class="entry" data-type="decision" data-tags="block-party,location">
+      <div class="entry__marker" style="color: #c4956a">&#9733;</div>
+      <div class="entry__content">
+        <div class="entry__meta">
+          <time class="entry__date">Mar 11, 2026</time>
+          <span class="entry__type" style="color: #c4956a">Decision</span>
+          <span class="status status--decided" data-status="decided">decided</span>
+        </div>
+        <h3 class="entry__title">Format: Street Takeover Across Front Lawns</h3>
+        <div class="entry__body"><p><strong>Question:</strong> What format should the block party take? Buffet/mingling, long table, progressive stations, or something else?</p>
+
+<p><strong>Decision:</strong> Street "takeover" with station areas spread across 4–5 front lawns (Petra/Paul's yard, Deb's driveway, Jim's front area). Consensus at the planning meeting.</p></div>
+        
+        
+        <div class="entry__actions">
+          <button class="entry__action" title="Add a comment" data-i18n-title="action_comment">
+            <span class="entry__action-icon">&#9998;</span>
+            <span data-i18n="action_comment">Comment</span>
+          </button>
+          <button class="entry__action" title="Raise a concern" data-i18n-title="action_concern">
+            <span class="entry__action-icon">&#9888;</span>
+            <span data-i18n="action_concern">Concern</span>
+          </button>
+          
+        </div>
+        <div class="entry__tags"><span class="tag">block-party</span><span class="tag">location</span></div>
+      </div>
+    </div>
+
+    <div class="entry" data-type="event" data-tags="block-party,food,location,activities,outreach,roles">
+      <div class="entry__marker" style="color: #7A8A6E">&#9679;</div>
+      <div class="entry__content">
+        <div class="entry__meta">
+          <time class="entry__date">Mar 11, 2026</time>
+          <span class="entry__type" style="color: #7A8A6E">Event</span>
+          <span class="status status--complete" data-status="complete">complete</span>
+        </div>
+        <h3 class="entry__title">Block Party Planning Meeting</h3>
+        <div class="entry__body"><p>First planning meeting held at Petra and Paul's house. 7 neighbors attended.</p>
+
+<p><strong>Overview:</strong> Post-fire community gathering to celebrate neighborhood recovery and foster connections. Target ~80 people on email list, likely more with family.</p>
+
+<p><strong>Format:</strong> Street "takeover" with station areas across 4–5 front lawns (Petra/Paul's front yard, Deb's driveway, Jim's front area).</p>
+
+<p><strong>Food:</strong> Paul anchoring with a main dish (possibly paella). Potluck organized via SignUpGenius with categories: anchor dishes, salads, appetizers, desserts, and a "surprise us" category. Angel fund concept for neighbors facing financial constraints. Planning for 80+ people.</p>
+
+<p><strong>Music:</strong> Exploring options: Guillermo (guitarist), Amy and Alan Wasserman (jazz, from Calaveras), possible DJ setup with neighborhood equipment.</p>
+
+<p><strong>Activities:</strong> Cornhole, ping pong, karaoke. Accessibility planning for residents with mobility challenges.</p>
+
+<p><strong>Outreach:</strong> Zone 129 only. Email blast, physical flyers door-to-door, personal outreach. Cross-reference with EFRU membership for accuracy.</p>
+
+<p><strong>Location:</strong> Petra/Paul + Deb + Jim (connected flat spaces). Informal street takeover, minimal traffic. Equipment: tables/chairs (survey residents first), pop-up tents for shade, string lights (Paul has supply).</p>
+
+<p><strong>Timeline:</strong> Late June to early July, before July 4th weekend. Avoid Memorial Day. 4–8pm, sunset at 8:15pm.</p>
+
+<p><strong>Next meeting:</strong> March 25, same time, same location.</p></div>
+        
+        
+        <div class="entry__actions">
+          <button class="entry__action" title="Add a comment" data-i18n-title="action_comment">
+            <span class="entry__action-icon">&#9998;</span>
+            <span data-i18n="action_comment">Comment</span>
+          </button>
+          <button class="entry__action" title="Raise a concern" data-i18n-title="action_concern">
+            <span class="entry__action-icon">&#9888;</span>
+            <span data-i18n="action_concern">Concern</span>
+          </button>
+          
+        </div>
+        <div class="entry__tags"><span class="tag">block-party</span><span class="tag">food</span><span class="tag">location</span><span class="tag">activities</span><span class="tag">outreach</span><span class="tag">roles</span></div>
+      </div>
+    </div>
+
+    <div class="entry" data-type="event" data-tags="block-party,food">
+      <div class="entry__marker" style="color: #7A8A6E">&#9679;</div>
+      <div class="entry__content">
+        <div class="entry__meta">
+          <time class="entry__date">Mar 12, 2026</time>
+          <span class="entry__type" style="color: #7A8A6E">Event</span>
+          <span class="status status--active" data-status="active">active</span>
+        </div>
+        <h3 class="entry__title">Grant Research for Block Party</h3>
+        <div class="entry__body"><p>Lynne McDaniel is looking into grants to help fund the block party, similar to what Pasta Sisters received for their event at Loma Alta Park. Checking with Dept. of Angels. Status: waiting to hear back.</p></div>
+        <div class="comments"><div class="comments__label" data-i18n="label_comments">Comments</div>
+            <div class="comment">
+              <div class="comment__meta"><strong>Lynne McDaniel</strong> &middot; 2026-03-13</div>
+              <div class="comment__text">Waiting to hear back from Dept. of Angels re grant.</div>
+            </div></div>
+        
+        <div class="entry__actions">
+          <button class="entry__action" title="Add a comment" data-i18n-title="action_comment">
+            <span class="entry__action-icon">&#9998;</span>
+            <span data-i18n="action_comment">Comment</span>
+          </button>
+          <button class="entry__action" title="Raise a concern" data-i18n-title="action_concern">
+            <span class="entry__action-icon">&#9888;</span>
+            <span data-i18n="action_concern">Concern</span>
+          </button>
+          
+        </div>
+        <div class="entry__tags"><span class="tag">block-party</span><span class="tag">food</span></div>
+      </div>
+    </div>
+
+    <div class="entry" data-type="event" data-tags="block-party,activities">
+      <div class="entry__marker" style="color: #7A8A6E">&#9679;</div>
+      <div class="entry__content">
+        <div class="entry__meta">
+          <time class="entry__date">Mar 13, 2026</time>
+          <span class="entry__type" style="color: #7A8A6E">Event</span>
+          <span class="status status--complete" data-status="complete">complete</span>
+        </div>
+        <h3 class="entry__title">Music Update</h3>
+        <div class="entry__body"><p>Guillermo is unable to play due to arthritis in his hands since the pandemic. Debra Cohen reached out to Amy Wasserman, who is checking with Alan about playing jazz at the party. Status: waiting to hear back from the Wassermans.</p></div>
+        
+        
+        <div class="entry__actions">
+          <button class="entry__action" title="Add a comment" data-i18n-title="action_comment">
+            <span class="entry__action-icon">&#9998;</span>
+            <span data-i18n="action_comment">Comment</span>
+          </button>
+          <button class="entry__action" title="Raise a concern" data-i18n-title="action_concern">
+            <span class="entry__action-icon">&#9888;</span>
+            <span data-i18n="action_concern">Concern</span>
+          </button>
+          
+        </div>
+        <div class="entry__tags"><span class="tag">block-party</span><span class="tag">activities</span></div>
+      </div>
+    </div>
+
+    <div class="entry" data-type="event" data-tags="block-party,outreach">
+      <div class="entry__marker" style="color: #7A8A6E">&#9679;</div>
+      <div class="entry__content">
+        <div class="entry__meta">
+          <time class="entry__date">Mar 16, 2026</time>
+          <span class="entry__type" style="color: #7A8A6E">Event</span>
+          <span class="status status--active" data-status="active">active</span>
+        </div>
+        <h3 class="entry__title">Neighbor Survey</h3>
+        <div class="entry__body"><p>Google Form survey sent to all Zone 129 neighbors to gather feedback on the block party. Questions cover:</p>
+
+<ul>
+  <li>Preferred date (late June options)</li>
+  <li>Food contributions and dietary needs</li>
+  <li>Equipment available to lend (tables, chairs, tents)</li>
+  <li>Activities and entertainment ideas</li>
+  <li>Interest in helping with setup/breakdown</li>
+  <li>General ideas or requests</li>
+</ul>
+
+<p><a href="GOOGLE_FORM_URL" class="entry__cta" target="_blank">Take the survey</a></div>
+        
+        
+        <div class="entry__actions">
+          <button class="entry__action" title="Add a comment" data-i18n-title="action_comment">
+            <span class="entry__action-icon">&#9998;</span>
+            <span data-i18n="action_comment">Comment</span>
+          </button>
+          <button class="entry__action" title="Raise a concern" data-i18n-title="action_concern">
+            <span class="entry__action-icon">&#9888;</span>
+            <span data-i18n="action_concern">Concern</span>
+          </button>
+          
+        </div>
+        <div class="entry__tags"><span class="tag">block-party</span><span class="tag">outreach</span></div>
+      </div>
+    </div>
+    </div>
+
+    <div class="today-anchor" id="today-block-party"></div>
+    <div class="today-marker" data-i18n="today_marker">Today &mdash; March 23, 2026</div>
+
+    <div class="effort__present">
+      
+    </div>
+
+    <div class="section-label" data-i18n="label_future">Future Zone</div>
+    <div class="future-zone">
+      
+    <div class="entry" data-type="event" data-tags="block-party">
+      <div class="entry__marker" style="color: #7A8A6E">&#9679;</div>
+      <div class="entry__content">
+        <div class="entry__meta">
+          <time class="entry__date">Mar 25, 2026</time>
+          <span class="entry__type" style="color: #7A8A6E">Event</span>
+          <span class="status status--proposed" data-status="proposed">proposed</span>
+        </div>
+        <h3 class="entry__title">Planning Meeting #2</h3>
+        <div class="entry__body"><p>Second block party planning meeting. Same time, same location (Petra and Paul's house). Agenda TBD based on progress on action items.</p></div>
+        
+        
+        <div class="entry__actions">
+          <button class="entry__action" title="Add a comment" data-i18n-title="action_comment">
+            <span class="entry__action-icon">&#9998;</span>
+            <span data-i18n="action_comment">Comment</span>
+          </button>
+          <button class="entry__action" title="Raise a concern" data-i18n-title="action_concern">
+            <span class="entry__action-icon">&#9888;</span>
+            <span data-i18n="action_concern">Concern</span>
+          </button>
+          
+        </div>
+        <div class="entry__tags"><span class="tag">block-party</span></div>
+      </div>
+    </div>
+
+    <div class="entry entry--featured" data-type="event" data-tags="block-party">
+      <div class="entry__marker" style="color: #7A8A6E">&#9679;</div>
+      <div class="entry__content">
+        <div class="entry__meta">
+          <time class="entry__date">Jun 28, 2026</time>
+          <span class="entry__type" style="color: #7A8A6E">Event</span>
+          <span class="status status--proposed" data-status="proposed">proposed</span>
+        </div>
+        <h3 class="entry__title">The Block Party</h3>
+        <div class="entry__body"><p>Late June. 4pm to 8pm. Morada Place.</p>
+
+<p>Paella on the grill. Music in the air. Kids on the street. Neighbors who've never met sitting together for the first time. The whole block, out front, together.</p>
+
+<p>Bring a dish. Bring a chair. Bring your family. That's it.</p>
+
+<p>This is what we've been planning. This is what it's for.</p></div>
+        
+        
+        <div class="entry__actions">
+          <button class="entry__action" title="Add a comment" data-i18n-title="action_comment">
+            <span class="entry__action-icon">&#9998;</span>
+            <span data-i18n="action_comment">Comment</span>
+          </button>
+          <button class="entry__action" title="Raise a concern" data-i18n-title="action_concern">
+            <span class="entry__action-icon">&#9888;</span>
+            <span data-i18n="action_concern">Concern</span>
+          </button>
+          
+        </div>
+        <div class="entry__tags"><span class="tag">block-party</span></div>
+      </div>
+    </div>
+    </div>
+  </div>
+  <div class="effort" id="effort-community-garden" data-effort="community-garden" style="display: none;">
+    <div class="effort__header">
+      <div>
+        <h2 class="effort__name">Community Garden</h2>
+        <p class="effort__desc">A small shared garden on Morada Pl using Jim Tyberg's existing raised beds at 1191 Morada. The idea is simple: neighbors who want to grow food together, share the work, and share the harvest. Vivien Fortunaso, a master gardener and educator, is advising on what to plant and how to get started.</p>
+      </div>
+      <span class="effort-status" data-i18n="effort_status_exploring">exploring</span>
+    </div>
+
+    <div class="effort__purpose-section">
+      <p class="effort__purpose">This started as a conversation between Petra, Jim, and Vivien about what could be done with the raised garden boxes at 1191 Morada Pl. Jim has the space and the boxes. Vivien has decades of gardening experience. The neighborhood has the interest. We're exploring whether a small shared garden can work here, what to plant for the season, and who wants to be involved.</p>
+      <div class="effort__map"><svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="50" width="200" height="8" rx="2" fill="#4a5542" opacity="0.4"/><text x="100" y="47" text-anchor="middle" font-size="9" fill="#7A8A6E" font-family="DM Sans, sans-serif">Morada Pl</text><rect x="20" y="62" width="16" height="12" rx="2" fill="#3a4a32"/><text x="28" y="82" text-anchor="middle" font-size="6" fill="#6b7563" font-family="DM Sans, sans-serif">1184</text><rect x="50" y="62" width="16" height="12" rx="2" fill="#3a4a32"/><text x="58" y="82" text-anchor="middle" font-size="6" fill="#6b7563" font-family="DM Sans, sans-serif">1189</text><rect x="80" y="62" width="16" height="12" rx="2" fill="#E5905A"/><text x="88" y="82" text-anchor="middle" font-size="6" fill="#E5905A" font-weight="700" font-family="DM Sans, sans-serif">1191</text><rect x="110" y="62" width="16" height="12" rx="2" fill="#3a4a32"/><rect x="140" y="62" width="16" height="12" rx="2" fill="#3a4a32"/><circle cx="88" cy="100" r="3" fill="#E5905A"/><text x="98" y="103" font-size="7" fill="#E5905A" font-family="DM Sans, sans-serif">Garden</text></svg><div class="effort__map-label">1191 Morada Pl</div></div>
+    </div>
+    
+    <div class="phase-tracker">
+      <div class="section-label" style="padding-left: 0;" data-i18n="label_process">Governance Process</div>
+      <div class="phase__header">
+        <div class="phase__topic-spacer"></div>
+        <div class="phase__labels"><div class="phase__label">Define</div><div class="phase__label">Propose</div><div class="phase__label">Discuss</div><div class="phase__label phase__label--vote">Vote</div><div class="phase__label">Record</div></div>
+      </div>
+      
+            <div class="phase__row">
+              <div class="phase__topic">
+                <div class="phase__topic-name">Location & Setup</div>
+                <div class="phase__topic-summary">Jim's raised beds at 1191 Morada Pl. Reviewing condition and capacity.</div>
+              </div>
+              <div class="phase__track">
+                <div class="phase__line-bg"></div>
+                <div class="phase__line-fill" style="width: 50.0%"></div>
+                <div class="phase__marker" style="left: 50.0%"></div>
+              </div>
+            </div>
+            <div class="phase__row">
+              <div class="phase__topic">
+                <div class="phase__topic-name">What to Plant</div>
+                <div class="phase__topic-summary">Vivien advising on seasonal options. TBD based on space and interest.</div>
+              </div>
+              <div class="phase__track">
+                <div class="phase__line-bg"></div>
+                <div class="phase__line-fill" style="width: 10.0%"></div>
+                <div class="phase__marker" style="left: 10.0%"></div>
+              </div>
+            </div>
+            <div class="phase__row">
+              <div class="phase__topic">
+                <div class="phase__topic-name">Meeting Time</div>
+                <div class="phase__topic-summary">Morning or late afternoon? Getting hot soon.</div>
+              </div>
+              <div class="phase__track">
+                <div class="phase__line-bg"></div>
+                <div class="phase__line-fill" style="width: 10.0%"></div>
+                <div class="phase__marker" style="left: 10.0%"></div>
+              </div>
+            </div>
+            <div class="phase__row">
+              <div class="phase__topic">
+                <div class="phase__topic-name">Participation</div>
+                <div class="phase__topic-summary">2 volunteers so far (Raphael & Pamela). Gauging broader interest.</div>
+              </div>
+              <div class="phase__track">
+                <div class="phase__line-bg"></div>
+                <div class="phase__line-fill" style="width: 30.0%"></div>
+                <div class="phase__marker" style="left: 30.0%"></div>
+              </div>
+            </div>
+    </div>
+    
+    <div class="committee">
+      <div class="section-label" style="padding-left: 0;" data-i18n="label_committee">Planning Committee</div>
+      <div class="committee__grid">
+        
+        <div class="committee__member">
+          <div class="committee__name">Vivien Fortunaso</div>
+          <div class="committee__role">Master Gardener & Educator</div>
+          <div class="committee__address">1989 Mar Vista Ave</div>
+          <div class="committee__contact"><a href="mailto:ozviv@hotmail.com">ozviv@hotmail.com</a> &middot; (626) 818-7650</div>
+        </div>
+        <div class="committee__member">
+          <div class="committee__name">Jim Tyberg</div>
+          <div class="committee__role">Garden Boxes (Host)</div>
+          <div class="committee__address">1191 Morada Pl</div>
+          <div class="committee__contact"><a href="mailto:jrtyberg@gmail.com">jrtyberg@gmail.com</a> &middot; (323) 253-9744</div>
+        </div>
+        <div class="committee__member">
+          <div class="committee__name">Raphael Alford</div>
+          <div class="committee__role">Volunteer</div>
+          <div class="committee__address">2027 Mar Vista Ave</div>
+          <div class="committee__contact"><a href="mailto:raphalford@gmail.com">raphalford@gmail.com</a> &middot; (216) 212-7257</div>
+        </div>
+        <div class="committee__member">
+          <div class="committee__name">Pamela Aubert</div>
+          <div class="committee__role">Volunteer</div>
+          <div class="committee__address">2027 Mar Vista Ave</div>
+          <div class="committee__contact"><a href="mailto:aubertpam@gmail.com">aubertpam@gmail.com</a> &middot; (650) 575-8472</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label" data-i18n="label_past">Past</div>
+    <div class="effort__past">
+      
+    <div class="entry" data-type="event" data-tags="garden,planning">
+      <div class="entry__marker" style="color: #7A8A6E">&#9679;</div>
+      <div class="entry__content">
+        <div class="entry__meta">
+          <time class="entry__date">Mar 14, 2026</time>
+          <span class="entry__type" style="color: #7A8A6E">Event</span>
+          <span class="status status--complete" data-status="complete">complete</span>
+        </div>
+        <h3 class="entry__title">Site Visit at Jim's Garden Boxes</h3>
+        <div class="entry__body"><p>Petra, Jim, and Vivien met at 1191 Morada Pl to review Jim's existing raised garden beds and discuss what could be done. Assessed the condition of the boxes, available space, sun exposure, and water access. Vivien shared initial thoughts on what would grow well this season.</p></div>
+        
+        
+        <div class="entry__actions">
+          <button class="entry__action" title="Add a comment" data-i18n-title="action_comment">
+            <span class="entry__action-icon">&#9998;</span>
+            <span data-i18n="action_comment">Comment</span>
+          </button>
+          <button class="entry__action" title="Raise a concern" data-i18n-title="action_concern">
+            <span class="entry__action-icon">&#9888;</span>
+            <span data-i18n="action_concern">Concern</span>
+          </button>
+          
+        </div>
+        <div class="entry__tags"><span class="tag">garden</span><span class="tag">planning</span></div>
+      </div>
+    </div>
+
+    <div class="entry" data-type="event" data-tags="garden,outreach">
+      <div class="entry__marker" style="color: #7A8A6E">&#9679;</div>
+      <div class="entry__content">
+        <div class="entry__meta">
+          <time class="entry__date">Mar 16, 2026</time>
+          <span class="entry__type" style="color: #7A8A6E">Event</span>
+          <span class="status status--complete" data-status="complete">complete</span>
+        </div>
+        <h3 class="entry__title">Introduction Email Sent</h3>
+        <div class="entry__body"><p>Petra sent an email to Zone 129 neighbors introducing the community garden idea. Shared the concept of a small shared garden using Jim's raised beds at 1191 Morada Pl, with Vivien Fortunaso advising. Asked for volunteers and interest. Two responses so far: Raphael Alford and Pamela Aubert.</p></div>
+        
+        
+        <div class="entry__actions">
+          <button class="entry__action" title="Add a comment" data-i18n-title="action_comment">
+            <span class="entry__action-icon">&#9998;</span>
+            <span data-i18n="action_comment">Comment</span>
+          </button>
+          <button class="entry__action" title="Raise a concern" data-i18n-title="action_concern">
+            <span class="entry__action-icon">&#9888;</span>
+            <span data-i18n="action_concern">Concern</span>
+          </button>
+          
+        </div>
+        <div class="entry__tags"><span class="tag">garden</span><span class="tag">outreach</span></div>
+      </div>
+    </div>
+
+    <div class="entry" data-type="event" data-tags="garden,community">
+      <div class="entry__marker" style="color: #7A8A6E">&#9679;</div>
+      <div class="entry__content">
+        <div class="entry__meta">
+          <time class="entry__date">Mar 16, 2026</time>
+          <span class="entry__type" style="color: #7A8A6E">Event</span>
+          <span class="status status--complete" data-status="complete">complete</span>
+        </div>
+        <h3 class="entry__title">Two Volunteers Sign Up</h3>
+        <div class="entry__body"><p>Raphael Alford and Pamela Aubert (2027 Mar Vista Ave) responded to the introduction email. Both interested in helping with the garden. Pamela especially keen to be hands-on.</p></div>
+        <div class="comments"><div class="comments__label" data-i18n="label_comments">Comments</div>
+            <div class="comment">
+              <div class="comment__meta"><strong>Raphael Alford</strong> &middot; 2026-03-16</div>
+              <div class="comment__text">We love the idea of a community farm and would very much like to help out and be involved. Pamela in particular.</div>
+            </div></div>
+        
+        <div class="entry__actions">
+          <button class="entry__action" title="Add a comment" data-i18n-title="action_comment">
+            <span class="entry__action-icon">&#9998;</span>
+            <span data-i18n="action_comment">Comment</span>
+          </button>
+          <button class="entry__action" title="Raise a concern" data-i18n-title="action_concern">
+            <span class="entry__action-icon">&#9888;</span>
+            <span data-i18n="action_concern">Concern</span>
+          </button>
+          
+        </div>
+        <div class="entry__tags"><span class="tag">garden</span><span class="tag">community</span></div>
+      </div>
+    </div>
+
+    <div class="entry" data-type="decision" data-tags="garden,planning">
+      <div class="entry__marker" style="color: #c4956a">&#9733;</div>
+      <div class="entry__content">
+        <div class="entry__meta">
+          <time class="entry__date">Mar 17, 2026</time>
+          <span class="entry__type" style="color: #c4956a">Decision</span>
+          <span class="status status--active" data-status="active">active</span>
+        </div>
+        <h3 class="entry__title">Meeting Time: Morning or Late Afternoon?</h3>
+        <div class="entry__body"><p>Need to decide when to hold the first garden meeting on Saturday March 29. Two options:</p>
+
+<ul>
+  <li><strong>Morning (8-9am):</strong> Cooler, good light, but early for a weekend</li>
+  <li><strong>Late afternoon (4-5pm):</strong> Shade from the house, more relaxed, but getting warm</li>
+</ul>
+
+<p>It's starting to heat up, so timing matters for comfort and for the plants.</p></div>
+        
+        
+        <div class="entry__actions">
+          <button class="entry__action" title="Add a comment" data-i18n-title="action_comment">
+            <span class="entry__action-icon">&#9998;</span>
+            <span data-i18n="action_comment">Comment</span>
+          </button>
+          <button class="entry__action" title="Raise a concern" data-i18n-title="action_concern">
+            <span class="entry__action-icon">&#9888;</span>
+            <span data-i18n="action_concern">Concern</span>
+          </button>
+          <button class="entry__vote-btn" data-i18n="btn_vote">&#9745; Vote on this</button>
+        </div>
+        <div class="entry__tags"><span class="tag">garden</span><span class="tag">planning</span></div>
+      </div>
+    </div>
+    </div>
+
+    <div class="today-anchor" id="today-community-garden"></div>
+    <div class="today-marker" data-i18n="today_marker">Today &mdash; March 23, 2026</div>
+
+    <div class="effort__present">
+      
+    </div>
+
+    <div class="section-label" data-i18n="label_future">Future Zone</div>
+    <div class="future-zone">
+      
+    <div class="entry" data-type="event" data-tags="garden,planning">
+      <div class="entry__marker" style="color: #7A8A6E">&#9679;</div>
+      <div class="entry__content">
+        <div class="entry__meta">
+          <time class="entry__date">Mar 29, 2026</time>
+          <span class="entry__type" style="color: #7A8A6E">Event</span>
+          <span class="status status--proposed" data-status="proposed">proposed</span>
+        </div>
+        <h3 class="entry__title">First Garden Meeting at the Boxes</h3>
+        <div class="entry__body"><p>Meet at Jim's raised beds (1191 Morada Pl) to walk the space together, talk about what to plant, and figure out how to share the work.</p>
+
+<p><strong>Open question:</strong> Morning or late afternoon? It's starting to get hot. We need to decide before sending the invite.</p>
+
+<p><strong>Location:</strong> 1191 Morada Pl (Jim Tyberg's front yard)</p></div>
+        
+        
+        <div class="entry__actions">
+          <button class="entry__action" title="Add a comment" data-i18n-title="action_comment">
+            <span class="entry__action-icon">&#9998;</span>
+            <span data-i18n="action_comment">Comment</span>
+          </button>
+          <button class="entry__action" title="Raise a concern" data-i18n-title="action_concern">
+            <span class="entry__action-icon">&#9888;</span>
+            <span data-i18n="action_concern">Concern</span>
+          </button>
+          
+        </div>
+        <div class="entry__tags"><span class="tag">garden</span><span class="tag">planning</span></div>
+      </div>
+    </div>
+
+    <div class="entry" data-type="event" data-tags="garden,planting">
+      <div class="entry__marker" style="color: #7A8A6E">&#9679;</div>
+      <div class="entry__content">
+        <div class="entry__meta">
+          <time class="entry__date">Apr 05, 2026</time>
+          <span class="entry__type" style="color: #7A8A6E">Event</span>
+          <span class="status status--proposed" data-status="proposed">proposed</span>
+        </div>
+        <h3 class="entry__title">What to Plant: Tomatoes and Basil</h3>
+        <div class="entry__body"><p>Vivien recommends starting with tomatoes and basil, both of which thrive in Altadena's summer heat and do well in raised beds.</p>
+
+<p><strong>Tomato varieties for our climate:</strong>
+
+<ul>
+  <li><strong>Sungold</strong> — cherry tomato, incredibly sweet, prolific producer. Great for snacking and salads.</li>
+  <li><strong>Early Girl</strong> — classic slicer, reliable in SoCal heat, produces early and keeps going.</li>
+  <li><strong>Cherokee Purple</strong> — heirloom, deep flavor, beautiful dark color. Needs a little more care.</li>
+  <li><strong>Sweet 100</strong> — cherry tomato, can yield up to 1,000 fruits per plant. Hard to beat for raised beds.</li>
+</ul>
+
+<div class="entry__gallery"><img src="community-garden/attachments/tomatoes-vine.jpg" alt="Cherry tomatoes on the vine" class="entry__img" loading="lazy">
+<img src="community-garden/attachments/basil-plant.jpg" alt="Fresh basil in a raised bed" class="entry__img" loading="lazy"></div>
+
+<p><strong>Basil varieties:</strong>
+
+<ul>
+  <li><strong>Genovese</strong> — the classic Italian basil. Perfect companion to tomatoes, in the garden and on the plate.</li>
+  <li><strong>Thai basil</strong> — handles heat better than Genovese, great for Southeast Asian cooking.</li>
+</ul>
+
+<p>Tomatoes and basil are classic companion plants. The basil helps repel pests and may improve tomato flavor. We'll discuss final selections at the first garden meeting.</p></div>
+        
+        
+        <div class="entry__actions">
+          <button class="entry__action" title="Add a comment" data-i18n-title="action_comment">
+            <span class="entry__action-icon">&#9998;</span>
+            <span data-i18n="action_comment">Comment</span>
+          </button>
+          <button class="entry__action" title="Raise a concern" data-i18n-title="action_concern">
+            <span class="entry__action-icon">&#9888;</span>
+            <span data-i18n="action_concern">Concern</span>
+          </button>
+          
+        </div>
+        <div class="entry__tags"><span class="tag">garden</span><span class="tag">planting</span></div>
+      </div>
+    </div>
+    </div>
+  </div>
+  <div class="effort" id="effort-fire-preparedness" data-effort="fire-preparedness" style="display: none;">
+    <div class="effort__header">
+      <div>
+        <h2 class="effort__name">Fire Preparedness</h2>
+        <p class="effort__desc">Coordinating home hardening, defensible space, and emergency readiness across Zone 129. Learning from the Eaton Fire to protect what's standing.</p>
+      </div>
+      <span class="effort-status" data-i18n="effort_status_planned">planned</span>
+    </div>
+
+    
+    
+    <div class="phase-tracker">
+      <div class="section-label" style="padding-left: 0;" data-i18n="label_process">Governance Process</div>
+      <div class="phase__header">
+        <div class="phase__topic-spacer"></div>
+        <div class="phase__labels"><div class="phase__label">Define</div><div class="phase__label">Propose</div><div class="phase__label">Discuss</div><div class="phase__label phase__label--vote">Vote</div><div class="phase__label">Record</div></div>
+      </div>
+      
+            <div class="phase__row">
+              <div class="phase__topic">
+                <div class="phase__topic-name">Home Hardening Audit</div>
+                <div class="phase__topic-summary">Assess each home's vulnerability. Vents, roofing, vegetation clearance.</div>
+              </div>
+              <div class="phase__track">
+                <div class="phase__line-bg"></div>
+                <div class="phase__line-fill" style="width: 10.0%"></div>
+                <div class="phase__marker" style="left: 10.0%"></div>
+              </div>
+            </div>
+            <div class="phase__row">
+              <div class="phase__topic">
+                <div class="phase__topic-name">Emergency Contact Tree</div>
+                <div class="phase__topic-summary">Phone tree for rapid neighbor-to-neighbor alerts. Who checks on whom.</div>
+              </div>
+              <div class="phase__track">
+                <div class="phase__line-bg"></div>
+                <div class="phase__line-fill" style="width: 10.0%"></div>
+                <div class="phase__marker" style="left: 10.0%"></div>
+              </div>
+            </div>
+            <div class="phase__row">
+              <div class="phase__topic">
+                <div class="phase__topic-name">Evacuation Routes</div>
+                <div class="phase__topic-summary">Map clear routes for all three streets. Identify bottlenecks.</div>
+              </div>
+              <div class="phase__track">
+                <div class="phase__line-bg"></div>
+                <div class="phase__line-fill" style="width: 10.0%"></div>
+                <div class="phase__marker" style="left: 10.0%"></div>
+              </div>
+            </div>
+    </div>
+    
+
+    <div class="section-label" data-i18n="label_past">Past</div>
+    <div class="effort__past">
+      <div class="empty" data-i18n="empty_past">No past entries.</div>
+    </div>
+
+    <div class="today-anchor" id="today-fire-preparedness"></div>
+    <div class="today-marker" data-i18n="today_marker">Today &mdash; March 23, 2026</div>
+
+    <div class="effort__present">
+      
+    </div>
+
+    <div class="section-label" data-i18n="label_future">Future Zone</div>
+    <div class="future-zone">
+      <div class="empty" data-i18n="empty_future">Nothing scheduled yet.</div>
+    </div>
+  </div>
+  <div class="effort" id="effort-neighborhood-resources" data-effort="neighborhood-resources" style="display: none;">
+    <div class="effort__header">
+      <div>
+        <h2 class="effort__name">Neighborhood Resources</h2>
+        <p class="effort__desc">Tracking rebuilding resources, aid programs, and deadlines that affect Zone 129. Connecting neighbors to what's available.</p>
+      </div>
+      <span class="effort-status" data-i18n="effort_status_active">active</span>
+    </div>
+
+    <div class="section-label" style="padding-left: 0;">Categories</div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 32px;">
+      <div style="background: var(--toggle-bg); border-radius: 8px; padding: 16px;">
+        <div style="font-weight: 600; margin-bottom: 4px;">Aid Programs</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">FEMA, SBA, county, and nonprofit programs available to residents. Eligibility, deadlines, and how to apply.</div>
+      </div>
+      <div style="background: var(--toggle-bg); border-radius: 8px; padding: 16px;">
+        <div style="font-weight: 600; margin-bottom: 4px;">Contractor Referrals</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">Trusted contractors recommended by neighbors. Shared vetting and experiences.</div>
+      </div>
+      <div style="background: var(--toggle-bg); border-radius: 8px; padding: 16px;">
+        <div style="font-weight: 600; margin-bottom: 4px;">Insurance Navigation</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">Pooling knowledge on claims, disputes, adjusters, and timelines. What&rsquo;s working, what&rsquo;s not.</div>
+      </div>
+      <div style="background: var(--toggle-bg); border-radius: 8px; padding: 16px;">
+        <div style="font-weight: 600; margin-bottom: 4px;">Deadlines Tracker</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">Key filing dates, permit windows, program expirations, and meeting dates that affect Zone 129.</div>
+      </div>
+    </div>
+    <div style="font-size: 14px; color: var(--text-secondary); padding: 16px 0; border-top: 1px solid var(--border);">
+      Know a resource that should be listed? Contact your block captain: <strong style="color: var(--text);">petra_wennberg@icloud.com</strong>
+    </div>
+  </div>
+  <div class="effort" id="effort-skills-commons" data-effort="skills-commons" style="display: none;">
+    <div class="effort__header">
+      <div>
+        <h2 class="effort__name">Skills Commons</h2>
+        <p class="effort__desc">A shared directory of what neighbors can offer and what they need. Plumbing, legal advice, childcare, tools, rides, language help. We have more than we think.</p>
+      </div>
+      <span class="effort-status" data-i18n="effort_status_exploring">exploring</span>
+    </div>
+
+    <div class="section-label" style="padding-left: 0;">Categories</div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 32px;">
+      <div style="background: var(--toggle-bg); border-radius: 8px; padding: 16px;">
+        <div style="font-weight: 600; margin-bottom: 4px;">Home &amp; Property</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">Plumbing, electrical, carpentry, landscaping, painting, general handwork.</div>
+      </div>
+      <div style="background: var(--toggle-bg); border-radius: 8px; padding: 16px;">
+        <div style="font-weight: 600; margin-bottom: 4px;">Professional Services</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">Legal advice, insurance navigation, tax help, financial planning, real estate.</div>
+      </div>
+      <div style="background: var(--toggle-bg); border-radius: 8px; padding: 16px;">
+        <div style="font-weight: 600; margin-bottom: 4px;">Technology</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">Computer help, Wi-Fi setup, phone troubleshooting, smart home, design.</div>
+      </div>
+      <div style="background: var(--toggle-bg); border-radius: 8px; padding: 16px;">
+        <div style="font-weight: 600; margin-bottom: 4px;">Care &amp; Support</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">Childcare, elder check-ins, pet sitting, meal delivery, rides, errands.</div>
+      </div>
+      <div style="background: var(--toggle-bg); border-radius: 8px; padding: 16px;">
+        <div style="font-weight: 600; margin-bottom: 4px;">Language &amp; Translation</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">Spanish, Mandarin, Japanese, Armenian, Korean, ASL, document translation.</div>
+      </div>
+      <div style="background: var(--toggle-bg); border-radius: 8px; padding: 16px;">
+        <div style="font-weight: 600; margin-bottom: 4px;">Tools &amp; Equipment</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">Power tools, ladders, generators, trucks, camping gear, tables and chairs.</div>
+      </div>
+      <div style="background: var(--toggle-bg); border-radius: 8px; padding: 16px;">
+        <div style="font-weight: 600; margin-bottom: 4px;">Knowledge &amp; Teaching</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">Gardening, cooking, music, tutoring, first aid, fire safety, yoga.</div>
+      </div>
+    </div>
+    <div style="font-size: 14px; color: var(--text-secondary); padding: 16px 0; border-top: 1px solid var(--border);">
+      Want to add your skills or request help? Contact your block captain: <strong style="color: var(--text);">petra_wennberg@icloud.com</strong>
+    </div>
+  </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer__brand">
+      <span class="footer__alting">Alting</span>
+      <span class="footer__tagline">Govern From Within</span>
+    </div>
+    <div class="footer__meta">
+      Zone 129 &middot; <a href="https://joinalting.org">joinalting.org</a>
+    </div>
+  </footer>
+
+  <script>
+    var STRINGS = {
+      en: {
+        filter_all: "All", filter_events: "Events", filter_decisions: "Decisions",
+        filter_discussions: "Discussions", filter_documents: "Documents",
+        label_past: "Past", label_future: "Future Zone", label_committee: "Planning Committee",
+        today_marker: "Today &mdash; March 23, 2026", today_date: "March 23, 2026",
+        empty_past: "No past entries.", empty_future: "Nothing scheduled yet.",
+        footer_powered: "Powered by",
+        type_event: "Event", type_decision: "Decision", type_discussion: "Discussion", type_document: "Document",
+        status_complete: "complete", status_decided: "decided", status_active: "active",
+        status_proposed: "proposed", status_exploring: "exploring",
+        effort_status_active: "active", effort_status_exploring: "exploring",
+        label_process: "Governance Process", label_comments: "Comments",
+        action_comment: "Comment", action_concern: "Concern", btn_vote: "&#9745; Vote on this",
+        label_members: "Zone 129 Members",
+        label_neighbors: "Our Neighbors"
+      },
+      es: {
+        filter_all: "Todo", filter_events: "Eventos", filter_decisions: "Decisiones",
+        filter_discussions: "Discusiones", filter_documents: "Documentos",
+        label_past: "Pasado", label_future: "Zona Futura", label_committee: "Comit&eacute; de Planificaci&oacute;n",
+        today_marker: "Hoy &mdash; March 23, 2026", today_date: "March 23, 2026",
+        empty_past: "No hay entradas pasadas.", empty_future: "Nada programado a&uacute;n.",
+        footer_powered: "Impulsado por",
+        type_event: "Evento", type_decision: "Decisi&oacute;n", type_discussion: "Discusi&oacute;n", type_document: "Documento",
+        status_complete: "completo", status_decided: "decidido", status_active: "activo",
+        status_proposed: "propuesto", status_exploring: "explorando",
+        effort_status_active: "activo", effort_status_exploring: "explorando",
+        label_process: "Proceso de Gobernanza", label_comments: "Comentarios",
+        action_comment: "Comentar", action_concern: "Preocupaci&oacute;n", btn_vote: "&#9745; Votar",
+        label_members: "Miembros de Zona 129",
+        label_neighbors: "Nuestros Vecinos"
+      }
+    };
+
+    var currentLang = "en";
+    var currentEffort = null;
+
+    function setLang(lang) {
+      currentLang = lang;
+      document.documentElement.lang = lang;
+      document.querySelectorAll("[data-i18n]").forEach(function(el) {
+        var key = el.dataset.i18n;
+        if (STRINGS[lang][key]) el.innerHTML = STRINGS[lang][key];
+      });
+      document.querySelectorAll(".entry__type").forEach(function(el) {
+        var type = el.closest(".entry").dataset.type;
+        if (STRINGS[lang]["type_" + type]) el.innerHTML = STRINGS[lang]["type_" + type];
+      });
+      document.querySelectorAll(".status").forEach(function(el) {
+        var s = el.dataset.status;
+        if (STRINGS[lang]["status_" + s]) el.textContent = STRINGS[lang]["status_" + s];
+      });
+      document.querySelectorAll(".effort-status").forEach(function(el) {
+        var key = el.dataset.i18n;
+        if (STRINGS[lang][key]) el.textContent = STRINGS[lang][key];
+      });
+      // Update effort tab labels
+      document.querySelectorAll(".effort-tab").forEach(function(tab) {
+        tab.textContent = tab.dataset[lang] || tab.dataset.en;
+      });
+      document.querySelectorAll("#lang-toggle .toggle__btn").forEach(function(btn) {
+        btn.classList.toggle("active", btn.dataset.lang === lang);
+      });
+      localStorage.setItem("ting-lang", lang);
+    }
+
+    function setTheme(theme) {
+      document.documentElement.dataset.theme = theme;
+      document.querySelectorAll("#theme-toggle .toggle__btn").forEach(function(btn) {
+        btn.classList.toggle("active", btn.dataset.themeVal === theme);
+      });
+      localStorage.setItem("ting-theme", theme);
+    }
+
+    function setEffort(effortId) {
+      currentEffort = effortId;
+      document.querySelectorAll(".effort-tab").forEach(function(tab) {
+        tab.classList.toggle("active", tab.dataset.effort === effortId);
+      });
+      document.querySelectorAll(".effort").forEach(function(el) {
+        el.style.display = el.dataset.effort === effortId ? "block" : "none";
+      });
+      // Hide filters on About tab
+      document.querySelector(".filter-row").style.display = effortId === "about" ? "none" : "flex";
+      // Scroll to today
+      var anchor = document.getElementById("today-" + effortId);
+      if (anchor) {
+        setTimeout(function() {
+          anchor.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 200);
+      }
+      localStorage.setItem("ting-effort", effortId);
+    }
+
+    function applyFilter(filter) {
+      document.querySelectorAll(".filter-btn").forEach(function(b) { b.classList.remove("active"); });
+      document.querySelector('.filter-btn[data-filter="' + filter + '"]').classList.add("active");
+      document.querySelectorAll(".entry").forEach(function(entry) {
+        entry.style.display = (filter === "all" || entry.dataset.type === filter) ? "flex" : "none";
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      var savedTheme = localStorage.getItem("ting-theme") || "dark";
+      var savedLang = localStorage.getItem("ting-lang") || "en";
+      setTheme(savedTheme);
+      setLang(savedLang);
+
+      // Set initial effort
+      var savedEffort = localStorage.getItem("ting-effort");
+      var firstTab = document.querySelector(".effort-tab");
+      setEffort(savedEffort || (firstTab ? firstTab.dataset.effort : ""));
+
+      // Effort tabs
+      document.querySelectorAll(".effort-tab").forEach(function(tab) {
+        tab.addEventListener("click", function() { setEffort(this.dataset.effort); });
+      });
+
+      // Filter buttons
+      document.querySelectorAll(".filter-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() { applyFilter(this.dataset.filter); });
+      });
+
+      // Theme toggle
+      document.querySelectorAll("#theme-toggle .toggle__btn").forEach(function(btn) {
+        btn.addEventListener("click", function() { setTheme(this.dataset.themeVal); });
+      });
+
+      // Language toggle
+      document.querySelectorAll("#lang-toggle .toggle__btn").forEach(function(btn) {
+        btn.addEventListener("click", function() { setLang(this.dataset.lang); });
+      });
+    });
+  </script>
+
+</body>
+</html>
